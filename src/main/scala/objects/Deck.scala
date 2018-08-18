@@ -1,19 +1,15 @@
 package objects
 
-import scala.collection.mutable.ArrayBuffer
-
 case class Deck() {
 
-  private val deck_cards = ArrayBuffer[Card]()
+  private val symbols = Seq("a","k","q","j","t","9","8","7","6","5","4","3","2")
+  private val colors = Seq("d","h","s","c")
 
-  for( i <- 1 to 13 ; j <- ('d', 'h', 's', 'c') ){
-    deck_cards += Card(i,j)
-  }
-
-
-
-
-
-
+  val deck_cards = symbols
+    .flatMap( symbol =>
+      colors.map( color =>
+        Card(symbol + color)
+      )
+    )
 
 }
