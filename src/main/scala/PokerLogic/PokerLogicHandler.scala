@@ -1,5 +1,0 @@
-package PokerLogic
-
-object PokerLogicHandler {
-
-}
