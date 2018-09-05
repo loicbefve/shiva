@@ -25,5 +25,4 @@ abstract class Combination {
     "d" -> "Diamond"
   )
 
-
 }

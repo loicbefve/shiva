@@ -4,11 +4,11 @@ object Board {
 
   def main( args: Array[String] ): Unit = {
 
-    val flop = Flop( Card( "8c" ), Card( "8s" ), Card( "9S" ) )
+    val flop = Flop( Card( "Qc" ), Card( "8s" ), Card( "9S" ) )
 
-    val board = Board( flop )
+    val board = Board( flop, Card( "Tc" ), Card( "Js" ) )
 
-    val hand = Hand( Card( "8h" ), Card( "9h" ) )
+    val hand = Hand( Card( "Kh" ), Card( "Ah" ) )
 
     board.combination( hand )
 
@@ -17,15 +17,17 @@ object Board {
 
 case class Board(
                 flop: Flop,
-                turn: Option[Card] = None,
-                river: Option[Card] = None
+                private var turn: Card = null,
+                private var river: Card = null
                 ) {
+
+  //TODO: Handle case null, null, the program think it's two same cards
 
   /** Handle illegal argument */
   if (
-    turn.getOrElse( "turn" ) == river.getOrElse( "river" ) ||
-    flop.toSeq.contains( river.getOrElse( "river" ) ) ||
-    flop.toSeq.contains( turn.getOrElse( "turn" ) )
+    turn == river ||
+    flop.toSeq.contains( river ) ||
+    flop.toSeq.contains( turn )
   ) {
 
     throw new IllegalArgumentException(
@@ -35,43 +37,58 @@ case class Board(
 
   }
 
+  /**
+    * Get all the cards on the board
+    *
+    * @return A sequence of all the cards on th board
+    */
   def get_cards: Seq[Card] = {
 
-    flop.toSeq ++ turn ++ river
+    flop.toSeq ++ Seq( turn ) ++ Seq( river )
+
   }
 
+  /**
+    * Find the combo of a hand on a board
+    *
+    * @param hand : The hand that we want to know the combo
+    */
   def combination( hand: Hand ): Unit = {
 
-    val all_card = Seq(
+    val all_cards = Seq(
       hand.card1,
       hand.card2,
     ) ++ get_cards
 
-    val grouped_card_by_value = all_card
+    val grouped_card_by_value = all_cards
     .groupBy( _.value )
 
-    val grouped_card_by_color = all_card
+    val grouped_card_by_color = all_cards
     .groupBy( _.color )
 
-    val sorted_card = all_card
+    val sorted_card = all_cards
     .sortBy( _.value )
 
-    val high_card = all_card
+    /** Your highest card */
+    val high_card = all_cards
     .map( _.value )
     .max
 
+    /** Your pairs */
     val pairs = grouped_card_by_value
     .filter { case (_, cards) =>
       cards.length == 2
     }
     .keys
 
+    /** Your three of */
     val three = grouped_card_by_value
     .filter { case (value, cards) =>
       cards.length == 3
     }
     .keys
 
+    /** Your full */
     val full = {
 
       if ( pairs.nonEmpty && three.nonEmpty ) {
@@ -92,25 +109,39 @@ case class Board(
 
     val straight = {
 
-      val possible_straight = Seq( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 )
+      val possible_straights = Seq(
+        Seq( 14, 2, 3, 4, 5 ),
+        Seq( 2, 3, 4, 5, 6 ),
+        Seq( 3, 4, 5, 6, 7 ),
+        Seq( 4, 5, 6, 7, 8 ),
+        Seq( 5, 6, 7, 8, 9 ),
+        Seq( 6, 7, 8, 9, 10 ),
+        Seq( 7, 8, 9, 10, 11 ),
+        Seq( 8, 9, 10, 11, 12 ),
+        Seq( 9, 10, 11, 12, 13 ),
+        Seq( 10, 11, 12, 13, 14 ),
+      )
 
-      for ( i <- sorted_card ) {
+      /** All the straights */
+      val possible_results = possible_straights
+      .filter( straight => {
+        sorted_card.map( _.value )
+        .distinct
+        .containsSlice( straight )
+      } )
 
-        val current_index = sorted_card.indexOf( i )
+      val result = possible_results
+      .filter( result => {
+        result.last == possible_results.map( _.last ).max
+      } )
 
-        sorted_card
-
-        for ( j <- current_index to current_index + 5 ) {
-
-          if ( sorted_card( j + 1 ).value == sorted_card( j ).value + 1 ) {}
-
-        }
-
-      }
+      result.headOption.getOrElse( List() )
 
     }
 
-    println( full )
+    println( straight )
+
   }
 
 }
+
