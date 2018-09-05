@@ -4,11 +4,11 @@ object Board {
 
   def main( args: Array[String] ): Unit = {
 
-    val flop = Flop( Card( "Qc" ), Card( "8s" ), Card( "9S" ) )
+    val flop = Flop( Card( "Qc" ), Card( "8c" ), Card( "9c" ) )
 
-    val board = Board( flop, Card( "Tc" ), Card( "Js" ) )
+    val board = Board( flop, Card( "Tc" ), Card( "Jc" ) )
 
-    val hand = Hand( Card( "Kh" ), Card( "Ah" ) )
+    val hand = Hand( Card( "Kc" ), Card( "Ac" ) )
 
     board.combination( hand )
 
@@ -139,7 +139,15 @@ case class Board(
 
     }
 
-    println( straight )
+    val flush = {
+
+      grouped_card_by_color
+      .find( color => color._2.length >= 5 )
+      .getOrElse( List() )
+
+    }
+
+    println( flush )
 
   }
 
